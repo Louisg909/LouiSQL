@@ -2,21 +2,24 @@ from validate import DataType, Required, Unique
 
 
 class Type:
-    def __init__(self, name, datatype, unique=False, primary=False, required=False, auto_increment=False):
+    def __init__(self, name, datatype, unique=False, primary=False, required=False, auto_increment=False, formatting : list['methods']=None):
         self.name = name
+        self.formatting = formatting
         self.type = datatype
         self.unique_attributes = set()
         self.unique = unique
         self.auto_increment = auto_increment
         self.primary = primary
         self.validations = [test for test in [Unique if unique else None, Required if required else None, DataType] if test is not None]
+        print(self.validations)
         self.attributes = []
 
     def validate(self, value):
         for validation in self.validations:
+            print(validation)
             if not validation.test(value, self):
-                return validation.fail_message(value) + '\n'
-        return None
+                return validation.error_message(value) + '\n'
+        return ''
 
     
     def __contains__(self, item):
@@ -45,6 +48,9 @@ class Type:
         if self.validate(value): # validate
             if value not in self.unique_attributes:
                 self.unique_attributes.add(value) # used for seeing if a unique value exists.
+        if self.formatting != None:
+            for method in self.formatting:
+                value = method(value)
         return value
 
 
@@ -58,22 +64,23 @@ if __name__ == '__main__':
 
 # specific types:
 
-
 class ID(Type):
     def __init__(self):
-        super().__init__(self, 'id', int, True, True, True, True)
+        super().__init__('id', int, unique=True, primary=True, required=True, auto_increment=True)
         self.max = 0
 
     def new(self): # overriding new method for id
         self.max += 1
         return self.max
 
+class Text(Type):
+    def __init__(self, name, unique=False, primary=False, required=False, formatting=None):
+        super().__init__(name, str, unique=unique, primary=primary, required=required, formatting=formatting) 
+
+
 class Password(Type):
     def __init__(self, name):
-        super().__init__(self, name, str)
-
-    def add(self, value):
-        return
+        super().__init__(name, str, required=True)
 
 
 #class Text(Type):

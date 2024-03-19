@@ -1,10 +1,18 @@
 # need to ensure thread saftey for use of table.
 
-class LouiSQLRowError(Exception):
+class RowError(Exception):
     def cheese(self):
         return
 
-class SQL:
+class SQL: # rename to Database or something
+    def __init__(self):
+        self.tables = set()
+
+    def add_table(self, *attributes):
+        self.tables.add(SQL.Table(*attributes))
+        # how to call tables when querying? Sort this out.
+        # Querying in the outer class will also only be grabbing tables and putting them together
+        # the manipulation of tables and pulling info from tables will be done inside the SQL.Table class.
     class Smart_Organise:
         def __init__():
             self.tables : list['Table':list[str:'name']] = {}
@@ -38,7 +46,7 @@ class SQL:
                 fe
 
             Raises:
-                LouiSQLRowError: When 
+                RowError: When an validation is failed on the row, such as a wrong input type or no value given for a required value
             """ # should maybe change *args to **kwargs so then can add certain colums? If it is larger, some rows may be blank or None types? Also means it doesn't matter what order - this isn't important for now so leave this as a note for later.
             new_row = []
             columns = self.columns
@@ -52,19 +60,19 @@ class SQL:
                 i = index + 1 if increment_id else index
                 error_message += columns[i].validate(item)
             if error_message != '':
-                raise LouiSQLRowError(error_message)
+                raise RowError(error_message)
 
             # Add values to row
             for index, item in enumerate(args):
                 i = index + 1 if increment_id else index
-                new_row.append(columns[index].new(item))
+                new_row.append(columns[i].new(item))
 
             # add row to table data
             self.data.add(tuple(new_row))
             self.size += 1
 
         def __repr__(self): # want to do a lot more to this...
-            output = '|'
+            output = f'<LouiSQL Table>\n|'
             for column in self.columns:
                 output += f'{column.name:^20}|'
             output += '\n|'
