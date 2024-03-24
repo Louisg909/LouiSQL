@@ -2,7 +2,8 @@ from validate import DataType, Required, Unique
 
 
 class Type:
-    def __init__(self, name, datatype, unique=False, primary=False, required=False, auto_increment=False, formatting : list['methods']=None):
+    def __init__(self, name, datatype, unique=False, primary=False, required=False, auto_increment=False, formatting : list['methods']=None, idd=None):
+        self.id = idd
         self.name = name
         self.formatting = formatting
         self.type = datatype
@@ -13,6 +14,9 @@ class Type:
         self.validations = [test for test in [Unique if unique else None, Required if required else None, DataType] if test is not None]
         print(self.validations)
         self.attributes = []
+
+    def __hash__(self):
+        return self.id # only place for id - remove this and id if redundant - properly implement if not
 
     def validate(self, value):
         for validation in self.validations:
